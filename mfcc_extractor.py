@@ -7,7 +7,7 @@ from mfcc_utils import extract_features_from_directory
 
 # Extracción de características
 data_directory = './Grabaciones'
-commands = ['bird', 'dog', 'cat', 'go', 'house', 'tree', 'stop']
+commands = ['bird', 'dog', 'cat', 'house', 'tree']
 features, labels = extract_features_from_directory(data_directory)
 
 # Normalización

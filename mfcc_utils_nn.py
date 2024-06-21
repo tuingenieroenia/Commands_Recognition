@@ -1,3 +1,4 @@
+# mfcc_extraction.py
 import os
 import numpy as np
 from scipy.io import wavfile
@@ -30,16 +31,16 @@ def fft_spectrum(frames, NFFT=512):
 
 def mel_filter_banks(pow_frames, sample_rate, nfilt=40, NFFT=512):
     low_freq_mel = 0
-    high_freq_mel = (2595 * np.log10(1 + (sample_rate / 2) / 700))  
+    high_freq_mel = (2595 * np.log10(1 + (sample_rate / 2) / 700))
     mel_points = np.linspace(low_freq_mel, high_freq_mel, nfilt + 2)
     hz_points = (700 * (10**(mel_points / 2595) - 1))
     bin = np.floor((NFFT + 1) * hz_points / sample_rate)
 
     fbank = np.zeros((nfilt, int(np.floor(NFFT / 2 + 1))))
     for m in range(1, nfilt + 1):
-        f_m_minus = int(bin[m - 1])  
-        f_m = int(bin[m])              
-        f_m_plus = int(bin[m + 1])     
+        f_m_minus = int(bin[m - 1])
+        f_m = int(bin[m])
+        f_m_plus = int(bin[m + 1])
 
         for k in range(f_m_minus, f_m):
             fbank[m - 1, k] = (k - bin[m - 1]) / (bin[m] - bin[m - 1])
@@ -47,79 +48,19 @@ def mel_filter_banks(pow_frames, sample_rate, nfilt=40, NFFT=512):
             fbank[m - 1, k] = (bin[m + 1] - k) / (bin[m + 1] - bin[m])
 
     filter_banks = np.dot(pow_frames, fbank.T)
-    filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)  
-    filter_banks = 20 * np.log10(filter_banks)  
+    filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)
+    filter_banks = 20 * np.log10(filter_banks)
     return filter_banks
 
-def mfcc(signal, sample_rate):
+def mfcc(signal, sample_rate, numcep=13):
     emphasized_signal = pre_emphasis(signal)
     frames = framing(emphasized_signal, sample_rate)
     windowed_frames = apply_window(frames)
     pow_frames = fft_spectrum(windowed_frames)
     filter_banks = mel_filter_banks(pow_frames, sample_rate)
-    mfccs = dct(filter_banks, type=2, axis=1, norm='ortho')[:, 1 : 13]
+    mfccs = dct(filter_banks, type=2, axis=1, norm='ortho')[:, :numcep]
     return mfccs
 
-def extract_features_from_directory(directory_path, max_len=50):
-    feature_list = []
-    label_list = []
-    labels = ['bird', 'dog', 'cat', 'house', 'tree']
-    for label in labels:
-        label_dir = os.path.join(directory_path, label)
-        if not os.path.exists(label_dir):
-            print(f"Directory {label_dir} does not exist")
-            continue
-        for file_name in os.listdir(label_dir):
-            if file_name.endswith('.wav'):
-                file_path = os.path.join(label_dir, file_name)
-                sample_rate, signal = wavfile.read(file_path)
-                features = mfcc(signal, sample_rate)
-
-                # Normalizar la longitud del vector de características
-                if len(features) > max_len:
-                    features = features[:max_len]
-                elif len(features) < max_len:
-                    pad_width = max_len - len(features)
-                    features = np.pad(features, ((0, pad_width), (0, 0)), mode='constant')
-
-                feature_list.append(features)
-                label_list.append(label)
-    return np.array(feature_list), np.array(label_list)
-
-def predict_command_viterbi(features, models):
-    scores = {}
-    for command, model in models.items():
-        try:
-            logprob, state_sequence = model.decode(features, algorithm="viterbi")
-            scores[command] = logprob
-        except Exception as e:
-            print(f"Error decoding {command}: {e}")
-            scores[command] = -np.inf
-    return max(scores, key=scores.get)
-
-# Función para procesar un archivo de audio y predecir el comando
-def decode_audio_viterbi(file_path, models):
-    sample_rate, signal = wavfile.read(file_path)
-    features = mfcc(signal, sample_rate)
-
-    # Asegurarse de que las características tengan la misma longitud que durante el entrenamiento
-    max_len = 50  # Debe coincidir con el valor usado en extract_features_from_directory
-    if len(features) > max_len:
-        features = features[:max_len]
-    elif len(features) < max_len:
-        pad_width = max_len - len(features)
-        features = np.pad(features, ((0, pad_width), (0, 0)), mode='constant')
-
-    predicted_command = predict_command_viterbi(features, models)
-    return predicted_command
-
-""" # Ejemplo de uso
-fs, signal = wavfile.read('path/to/audio.wav')
-mfcc_features = mfcc(signal, fs)
-print(mfcc_features) """
-
-#ENFOQUE CON REDES NEURONALES
-# Función modificada para extraer MFCCs con diferentes longitudes
 def extract_features_with_mfcc_length(directory_path, n_mfcc, max_len, commands):
     feature_list = []
     label_list = []
@@ -132,7 +73,7 @@ def extract_features_with_mfcc_length(directory_path, n_mfcc, max_len, commands)
             if file_name.endswith('.wav'):
                 file_path = os.path.join(label_dir, file_name)
                 sample_rate, signal = wavfile.read(file_path)
-                features = mfcc(signal, sample_rate)
+                features = mfcc(signal, sample_rate, numcep=n_mfcc)
 
                 if len(features) > max_len:
                     features = features[:max_len]

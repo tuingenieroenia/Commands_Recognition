@@ -9,12 +9,12 @@ from hmmlearn import hmm
 
 # Directorio de datos y comandos a modelar
 data_directory = './Grabaciones'
-commands = ['bird', 'dog', 'cat', 'go', 'house', 'tree', 'stop']
+commands = ['bird', 'dog', 'cat','house', 'tree']
 
 # Parámetros del HMM
-n_components = 15  # Ajustar el número de estados ocultos
+n_components = 24 # Ajustar el número de estados ocultos
 covariance_type = 'diag'
-n_iter = 200  # Asegurarse de tener suficientes iteraciones
+n_iter = 800  # Asegurarse de tener suficientes iteraciones
 
 # Codificador de etiquetas
 label_encoder = LabelEncoder()
@@ -24,7 +24,7 @@ label_encoder.fit(commands)
 models = {}
 
 # Extraer características y etiquetas
-features, labels = extract_features_from_directory(data_directory, max_len=55)
+features, labels = extract_features_from_directory(data_directory, max_len=13)
 
 #Normalizamos las características
 scaler = StandardScaler()
@@ -46,13 +46,13 @@ for command in commands:
     
     # Guardar el modelo entrenado
     models[command] = model
-    joblib.dump(model, f'baumwelch_hmm_{command}.pkl')
+    joblib.dump(model, f'./models/baumwelch_hmm_{command}.pkl')
     print(f"Model for {command} trained and saved with Baum-Welch.")
 
 print("All models trained and saved successfully with Baum-Welch.")
 
 # Cargar los modelos entrenados
-models = {command: joblib.load(f'baumwelch_hmm_{command}.pkl') for command in commands}
+models = {command: joblib.load(f'./models/baumwelch_hmm_{command}.pkl') for command in commands}
 
 # Función para predecir el comando basado en características MFCC
 def predict_command(features, models):

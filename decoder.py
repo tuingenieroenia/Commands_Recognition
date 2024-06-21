@@ -39,6 +39,6 @@ def decode_audio_viterbi(file_path, models):
     return predicted_command
 
 # Ejemplo de uso: Decodificar un archivo de audio
-test_file = './Grabaciones/test_sample.wav'  # Reemplaza con el camino a tu archivo de prueba
+test_file = './Grabaciones/test_grabacion.wav'  # Reemplaza con el camino a tu archivo de prueba
 predicted_command = decode_audio_viterbi(test_file, models)
 print(f"Predicted Command using Viterbi: {predicted_command}")
