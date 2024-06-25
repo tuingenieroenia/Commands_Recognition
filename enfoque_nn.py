@@ -17,22 +17,13 @@ max_len = 55  # Longitud máxima de las características
 # Extraer características MFCC
 features, labels = extract_features_with_mfcc_length(data_directory, n_mfcc, max_len, commands)
 
-# Verifica la forma de los datos originales
-print(f"Original features shape: {features.shape}")
-
 # Aplanar características para la normalización
 X_flattened = [feat.flatten() for feat in features]
 X_flattened = np.array(X_flattened)
 
-# Verifica la forma después de la aplanación
-print(f"Flattened features shape: {X_flattened.shape}")
-
 # Normalizar características
 scaler = StandardScaler()
 X_normalized = scaler.fit_transform(X_flattened)
-
-# Verifica la forma después de la normalización
-print(f"Normalized features shape: {X_normalized.shape}")
 
 # Codificar etiquetas
 from sklearn.preprocessing import LabelEncoder
@@ -100,9 +91,6 @@ history = model.fit(X_train_reshaped, y_train_categorical, epochs=50, batch_size
 
 # Guardar el modelo entrenado
 model.save('cnn_speech_recognition_model.h5')
-
-
-
 
 # Evaluar el modelo
 test_loss, test_accuracy = model.evaluate(X_test_reshaped, y_test_categorical)

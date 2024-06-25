@@ -1,7 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
-from PIL import Image, ImageTk
 import random
 import os
 import sounddevice as sd
@@ -9,6 +6,10 @@ import numpy as np
 import scipy.io.wavfile as wav
 import joblib
 import keras
+
+from tkinter import ttk
+from tkinter import messagebox
+from PIL import Image, ImageTk
 from mfcc_utils_nn import mfcc
 
 # Lista de comandos e imágenes correspondientes
@@ -81,12 +82,6 @@ main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
 image_label = ttk.Label(main_frame)
 image_label.grid(row=0, column=0, padx=10, pady=10)
-
-""" record_button = ttk.Button(main_frame, text="Grabar y Reconocer", command=handle_record_and_predict)
-record_button.grid(row=1, column=0, padx=10, pady=10)
-
-new_image_button = ttk.Button(main_frame, text="Nueva Imagen", command=show_new_image)
-new_image_button.grid(row=2, column=0, padx=10, pady=10) """
 
 # Colores personalizados
 button_bg_color = '#445634'  # Color de fondo de los botones
